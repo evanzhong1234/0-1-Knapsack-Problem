@@ -1,0 +1,210 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <list>
+#include <cmath>
+using namespace std;
+
+int max(int a, int b)
+{
+    return (a > b) ? a : b;
+}
+
+int knapSack(int M, vector<int> &wt, vector<int> &val, vector<int> &f, int n, int g, int & weight)
+{
+    int i, j, w;
+    int k;
+    vector<vector<int>> K(n + 1, vector<int>(M + 1));
+
+    vector<vector<int>> L; //List
+    vector<int> P; //Price
+    vector<int> W; //Weight
+    if (n==0)
+    {
+      weight = 0;
+      return 0;
+    }
+
+    cout <<"n="<<n << " g=" <<g<<endl;
+    //initialize table entries
+    L.resize(g+1);
+    P.resize(g+1);
+    W.resize(g+1);
+    cout <<"i val wt f" << endl;
+    for ( i = 0; i<n ; i++)
+    {
+       cout << i << " " << val[i] << " " << wt[i] << " " << f[i] << endl;
+       for ( j= g-f[i]; j>=0; j--)
+       {
+         k = j+f[i];
+         if ( ((j==0)|(W[j]>0)) && (W[j]+wt[i] <= M) && (W[k]==0 ||(W[k] > (W[j] + wt[i]))) )  
+         {
+         //Dynamic programming, replace with lighter selection for each
+         //normalized price value
+           L[k] = L[j];
+           L[k].push_back(i);
+           P[k] = P[j] + val[i];
+           W[k] = W[j] + wt[i];
+         }
+       }
+
+    }
+
+    cout << "i W P" <<endl;
+    int P_best=0;
+    int i_best=0;
+    for (i=g; i>=0;i--)
+    {
+      cout << i << " " << W[i] << " " << P[i] <<endl;
+      if (P[i]>P_best)
+      {
+        P_best = P[i];
+        i_best = i;
+      }
+    }
+    weight = W[i_best];
+    return P_best;
+}
+
+
+int main() {
+  ifstream fin;
+ 
+  int n;
+  int M;
+  fin.open("f3.txt");
+  fin >> n >> M;
+  int counter = n;
+  int done = 0;
+  int c[n];
+  int p[n];
+  int use[n];
+ 
+  for (int i = 0;i < n;i++) {
+    use[i] = 0;
+  }
+ 
+  float e = 0.1;
+  float pd[n];
+  int C = 0;
+  int P = 0;
+ 
+
+  for (int i=0; i<n; i++)
+  {
+    fin >> p[i] >> c[i];
+ 
+  }
+  fin.close();
+ 
+  int capacity ;
+  //Calculate price / weight ratio  
+  for (int i = 0;i < n;i++) {
+    pd[i] = (float) p[i]/(float)c[i];
+
+  }
+  // bubble sort for pd
+  float temp = 0;
+ 
+  for(int i=0;i<n;i++)
+  {
+    for(int j=i+1;j<n;j++)
+    {
+       if (pd[i]<pd[j])
+       {
+         temp  = pd[i];
+         pd[i]=pd[j];
+         pd[j]=temp;
+       
+         temp = p[i];
+         p[i]=p[j];
+         p[j]=temp;
+
+         temp = c[i];
+         c[i]=c[j];
+         c[j]=temp;
+       }
+    }
+  }
+ 
+ 
+  int i = 1;
+  while (i <= n && C < M) {
+    P = P + p[i-1];
+    C = C + c[i-1];
+    i++;
+  }
+  i = i - 1;
+  int indices = i;
+  if (i == n or C == M) {
+    done = 1;
+  }
+  cout<<"Greedy: "<< P-p[i-1]<<endl;
+ 
+  float delta = P * e * 0.111111 * e;
+  cout <<"delta= " << delta << endl;
+  int g = floor(P / delta);
+  cout << "Normalized g=" << g <<endl;
+  i = 1;
+  vector<int> smallp = {};
+  vector<int> smallc = {};
+  vector<int> tablep = {};
+  vector<int> tablec = {};
+  int smalln = 0;
+  while (i <= n) {
+    if (p[i-1] < 0.33333 * e * P) {
+      smallp.push_back(p[i-1]);
+      smallc.push_back(c[i-1]);
+      
+      smalln++;
+      counter--;
+    }
+    else {
+   
+      tablep.push_back(p[i-1]);
+      tablec.push_back(c[i-1]);
+      
+
+    }
+    i++;
+  }
+ 
+
+ 
+/*   for (int entry : tablep) {
+  std::cout << entry << " ";
+}
+std::cout << std::endl;
+
+for (int entry : tablec) {
+  std::cout << entry << " ";
+}
+ 
+std::cout << std::endl;
+*/
+  //normalize the price
+  vector<int> f;
+  for (int i = 0; i < counter; i++)
+    f.push_back(floor(float(tablep[i])/delta));
+   
+  //need to return to results, price and left over capacity
+  //
+  int weight;
+  int table = knapSack(M, tablec, tablep, f, counter, g, weight);
+  capacity = M -weight;
+
+  cout <<"Approximate:" << table << " weight:" <<weight<< endl;
+
+ 
+  for (int i = 0; i < smalln;i++) {
+ 
+    if (smallc[i] <= capacity) {
+        capacity = capacity - smallc[i];
+        table = table + smallp[i];
+    }
+   
+  }
+  cout << "After Small:" << table <<endl;
+}
