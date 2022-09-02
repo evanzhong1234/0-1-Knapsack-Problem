@@ -1,0 +1,180 @@
+#include <iostream>
+#include <fstream>
+#include <cmath>
+using namespace std;
+
+int main() {
+ 
+int n;
+int capacity;
+//remainingcapacity
+
+
+  
+int score = 0;
+ifstream fin;
+  fin.open("f1.txt");
+  fin >> n >> capacity;
+  int M = capacity;
+int p[n];
+int c[n];
+float pd[n];
+  int use[n];
+  for (int i = 0;i < n;i++) {
+    use[i] = 0;
+  }
+  for (int i=0; i<n; i++)
+  {
+    fin >> p[i] >> c[i];
+  }
+   fin.close();
+//making profit density array  
+for (int i = 0;i < n;i++) {
+  pd[i] = p[i]/c[i];
+}
+  float temp = 0;
+//bubble sort
+  for(int i=0;i<n;i++)
+	{		
+		for(int j=i+1;j<n;j++)
+		{
+			if (pd[i]<pd[j])
+			{
+				temp  = pd[i];
+				pd[i]=pd[j];
+			  pd[j]=temp;
+        
+        temp = p[i];
+        p[i]=p[j];
+        p[j]=temp;
+
+        temp = c[i];
+        c[i]=c[j];
+        c[j]=temp;
+			}
+		}
+	}
+ 
+//greedy
+  for (int i = 0; i < n;i++) {
+  
+    if (c[i] <= capacity) {
+      capacity = capacity - c[i];
+      score = score + p[i];
+      use[i] = 1;
+    }
+  }
+  
+  int basescore = score;
+  int basecapacity = capacity;
+  cout<<"basescore "<<basescore<<endl;
+  cout<<"basecapacity "<<basecapacity<<endl;
+
+  //determine what to remove
+
+int copyp[n];
+    for (int i = 0;i < n;i++) {
+    copyp[i] = p[i];
+  }
+
+  for(int i=0;i<n;i++)
+	{		
+		for(int j=i+1;j<n;j++)
+		{
+			if (copyp[i]>copyp[j])
+			{
+				temp  = copyp[i];
+				copyp[i]=copyp[j];
+			  copyp[j]=temp;
+        
+        }
+      }
+    }
+  int mid = floor(n/2);
+  int medP = copyp[mid];
+ 
+  //removing blocks
+  int counter = 0;
+for (int i = n-1;i >= 0;i--) {
+  if (counter == 3 + floor(0.005*n)) {
+    
+    break;
+  }
+  if (p[i] < (1.2 * medP) && use[i] == 1) {
+    score = score - p[i];
+    capacity = capacity + c[i];
+    use[i] = 0;
+    counter++;
+    cout<<"block removed "<<score<<endl;
+    cout<<"new capacity "<<capacity<<endl;
+ 
+  }
+
+}
+  
+  int lowscore = score;
+  int lowcapacity = capacity;
+  cout<<"lowscore "<<lowscore<<endl;
+  cout<<"lowcapacity "<<lowcapacity<<endl;
+int current = lowscore;
+  int diff = 0;
+  for (int i = 0;i < n;i++) {
+  if (capacity > c[i] && use[i] == 0) {
+    diff = capacity - c[i];
+    
+    if (diff < (0.2 * M)) {
+      
+      use[i] = 3;
+      score = score + p[i];
+      capacity = capacity - c[i];
+      cout<<"newobject "<<score<<endl;
+      cout<<"newcapacity "<<capacity<<endl;
+      
+    for (int j = 0; j < n;j++) {
+  
+    if (c[j] <= capacity && use[j] == 0) {
+      capacity = capacity - c[j];
+      score = score + p[j];
+      use[j] = 3;
+    }
+      cout<<"use "<<j<<" "<<use[j]<<endl;
+  }
+      
+     cout<<"aftergreedy "<<score<<endl;
+      cout<<"lowscore "<<current<<endl;
+      if (score > current) {
+        current = score;
+      }
+    }
+    cout<<"better score"<<current<<endl;
+    
+    for (int k = 0;k < n;k++) {
+      if (use[k] == 3) {
+        use[k] = 0;
+      }   
+    }
+  for (int l = 0;l < n;l++) {
+    cout<<"use "<<l<<" "<<use[l]<<endl;
+  }
+    score = lowscore;
+    capacity = lowcapacity;
+  }
+ cout<<"lowscore "<<score<<endl;
+  cout<<"lowcapacity "<<capacity<<endl;
+  }
+
+        
+
+      
+    
+  
+
+  
+
+   
+  if (basescore >= current) {
+    current = basescore; 
+
+}
+  cout<<current;
+  }
