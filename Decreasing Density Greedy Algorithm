@@ -1,0 +1,62 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+int main() {
+ 
+int n;
+int capacity;
+
+
+
+  
+int score = 0;
+ifstream fin;
+  fin.open("f7.txt");
+  fin >> n >> capacity;
+int weight[n];
+int cost[n];
+float eff[n];
+  for (int i=0; i<n; i++)
+  {
+    fin >> cost[i] >> weight[i];
+  }
+   fin.close();
+  
+for (int i = 0;i < n;i++) {
+  eff[i] = cost[i]/weight[i];
+}
+  int temp = 0;
+
+  for(int i=0;i<n;i++)
+	{		
+		for(int j=i+1;j<n;j++)
+		{
+			if (eff[i]<eff[j])
+			{
+				temp  = eff[i];
+				eff[i]=eff[j];
+			  eff[j]=temp;
+        
+        temp = cost[i];
+        cost[i]=cost[j];
+        cost[j]=temp;
+
+        temp = weight[i];
+        weight[i]=weight[j];
+        weight[j]=temp;
+			}
+		}
+	}
+ 
+ 
+  for (int i = 0; i < n;i++) {
+  
+    if (weight[i] <= capacity) {
+      capacity = capacity - weight[i];
+      score = score + cost[i];
+    }
+  }
+    
+  cout<<"score:"<<endl<<score;
+}
